@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>EthScope — Ethereum Transaction Analyzer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- ── Background Canvas ── -->
+<canvas id="bgCanvas"></canvas>
+
+<!-- ── Header ── -->
+<header class="header">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg viewBox="0 0 32 32" fill="none"><polygon points="16,2 28,9 28,23 16,30 4,23 4,9" stroke="#00ffb3" stroke-width="1.5"/><polygon points="16,8 22,12 22,20 16,24 10,20 10,12" fill="#00ffb3" opacity="0.15" stroke="#00ffb3" stroke-width="1"/><line x1="16" y1="2" x2="16" y2="30" stroke="#00ffb3" stroke-width="0.8" opacity="0.4"/></svg>
+    </div>
+    <span class="logo-text">EthScope</span>
+  </div>
+  <div class="header-meta">
+    <div class="eth-price-badge" id="ethPriceBadge">
+      <span class="badge-label">ETH</span>
+      <span class="badge-value" id="liveEthPrice">—</span>
+    </div>
+  </div>
+</header>
+
+<!-- ── Hero Section ── -->
+<section class="hero">
+  <div class="hero-eyebrow">BLOCKCHAIN FORENSICS TOOL</div>
+  <h1 class="hero-title">
+    Decode Every<br/>
+    <span class="accent">Transaction</span>
+  </h1>
+  <p class="hero-sub">Paste any Ethereum wallet address to get instant analytics — gas fees, fund flows, and a complete transaction history. No SQL. No subscriptions.</p>
+
+  <!-- Search Bar -->
+  <div class="search-container">
+    <div class="search-box" id="searchBox">
+      <div class="search-prefix">0x</div>
+      <input
+        type="text"
+        id="addressInput"
+        placeholder="Enter wallet address (e.g. 0xd8dA6BF...)"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <button class="analyze-btn" id="analyzeBtn">
+        <span class="btn-text">Analyze</span>
+        <svg class="btn-icon" viewBox="0 0 20 20"><path d="M10 2L18 10L10 18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/><line x1="2" y1="10" x2="18" y2="10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="search-options">
+      <label class="option-label">Last transactions:
+        <select id="limitSelect" class="limit-select">
+          <option value="25">25</option>
+          <option value="50" selected>50</option>
+          <option value="100">100</option>
+        </select>
+      </label>
+      <span class="hint-text" id="validationHint"></span>
+    </div>
+    <!-- Demo addresses -->
+    <div class="demo-addresses">
+      <span class="demo-label">Try a demo:</span>
+      <button class="demo-chip" data-addr="0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045">Vitalik</button>
+      <button class="demo-chip" data-addr="0xBE0eB53F46cd790Cd13851d5EFf43D12404d33E8">Binance</button>
+      <button class="demo-chip" data-addr="0x47ac0Fb4F2D84898e4D9E7b4DaB3C24507a6D503">Binance 2</button>
+    </div>
+  </div>
+</section>
+
+<!-- ── Loading State ── -->
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-card">
+    <div class="hex-spinner">
+      <div class="hex h1"></div>
+      <div class="hex h2"></div>
+      <div class="hex h3"></div>
+    </div>
+    <div class="loading-text" id="loadingText">Connecting to Ethereum network...</div>
+    <div class="loading-steps">
+      <div class="step" id="step1">Validating address</div>
+      <div class="step" id="step2">Fetching transactions</div>
+      <div class="step" id="step3">Computing analytics</div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Error Banner ── -->
+<div class="error-banner" id="errorBanner">
+  <svg viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2zm1 11H9v-2h2v2zm0-4H9V5h2v4z"/></svg>
+  <span id="errorMsg"></span>
+  <button class="error-close" onclick="document.getElementById('errorBanner').classList.remove('show')">✕</button>
+</div>
+
+<!-- ── Results Dashboard ── -->
+<main class="dashboard" id="dashboard">
+
+  <!-- Wallet Header -->
+  <section class="wallet-header">
+    <div class="wallet-info">
+      <div class="wallet-avatar" id="walletAvatar"></div>
+      <div class="wallet-details">
+        <div class="wallet-address-full" id="walletAddressFull"></div>
+        <div class="wallet-address-short" id="walletAddressShort"></div>
+      </div>
+      <a class="etherscan-link" id="etherscanLink" target="_blank" rel="noopener">
+        View on Etherscan
+        <svg viewBox="0 0 16 16" fill="none"><path d="M7 3H3v10h10v-4M13 3H9m4 0v4M7 9l6-6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      </a>
+    </div>
+    <div class="balance-card">
+      <div class="balance-label">Current Balance</div>
+      <div class="balance-eth" id="balanceEth">— ETH</div>
+      <div class="balance-usd" id="balanceUsd">≈ $—</div>
+    </div>
+  </section>
+
+  <!-- KPI Cards -->
+  <section class="kpi-grid">
+    <div class="kpi-card" id="kpiTx">
+      <div class="kpi-icon">⬡</div>
+      <div class="kpi-value" id="kpiTxValue">—</div>
+      <div class="kpi-label">Total Transactions</div>
+      <div class="kpi-sub" id="kpiTxSub"></div>
+    </div>
+    <div class="kpi-card kpi-danger" id="kpiGas">
+      <div class="kpi-icon">⛽</div>
+      <div class="kpi-value" id="kpiGasValue">—</div>
+      <div class="kpi-label">Total Gas Spent</div>
+      <div class="kpi-sub" id="kpiGasSub"></div>
+    </div>
+    <div class="kpi-card kpi-sent" id="kpiSent">
+      <div class="kpi-icon">↑</div>
+      <div class="kpi-value" id="kpiSentValue">—</div>
+      <div class="kpi-label">Total Sent</div>
+      <div class="kpi-sub" id="kpiSentSub"></div>
+    </div>
+    <div class="kpi-card kpi-received" id="kpiReceived">
+      <div class="kpi-icon">↓</div>
+      <div class="kpi-value" id="kpiReceivedValue">—</div>
+      <div class="kpi-label">Total Received</div>
+      <div class="kpi-sub" id="kpiReceivedSub"></div>
+    </div>
+    <div class="kpi-card kpi-flow" id="kpiFlow">
+      <div class="kpi-icon" id="kpiFlowIcon">⇄</div>
+      <div class="kpi-value" id="kpiFlowValue">—</div>
+      <div class="kpi-label">Net Flow</div>
+      <div class="kpi-sub" id="kpiFlowSub"></div>
+    </div>
+    <div class="kpi-card" id="kpiRate">
+      <div class="kpi-icon">✓</div>
+      <div class="kpi-value" id="kpiRateValue">—%</div>
+      <div class="kpi-label">Success Rate</div>
+      <div class="kpi-sub" id="kpiRateSub"></div>
+    </div>
+  </section>
+
+  <!-- Charts Row -->
+  <section class="charts-row">
+    <div class="chart-card" id="flowChartCard">
+      <h3 class="chart-title">Fund Flow</h3>
+      <div class="flow-visual" id="flowVisual"></div>
+    </div>
+    <div class="chart-card" id="activityChartCard">
+      <h3 class="chart-title">Transaction Volume <span class="chart-subtitle">(last 30 days)</span></h3>
+      <div class="bar-chart" id="barChart"></div>
+    </div>
+  </section>
+
+  <!-- Counterparties -->
+  <section class="counterparties-section" id="counterpartiesSection">
+    <h3 class="section-title">Top Counterparties</h3>
+    <div class="cp-list" id="cpList"></div>
+  </section>
+
+  <!-- Transaction Table -->
+  <section class="tx-section">
+    <div class="tx-header">
+      <h3 class="section-title">Transaction History</h3>
+      <div class="tx-filters">
+        <button class="filter-btn active" data-filter="all">All</button>
+        <button class="filter-btn" data-filter="in">Incoming</button>
+        <button class="filter-btn" data-filter="out">Outgoing</button>
+        <button class="filter-btn" data-filter="failed">Failed</button>
+        <button class="export-btn" id="exportBtn">↓ Export CSV</button>
+      </div>
+    </div>
+    <div class="tx-table-wrap">
+      <table class="tx-table" id="txTable">
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Hash</th>
+            <th>Date</th>
+            <th>Direction</th>
+            <th>From / To</th>
+            <th class="num-col">Value (ETH)</th>
+            <th class="num-col">Gas Fee (ETH)</th>
+            <th>Type</th>
+          </tr>
+        </thead>
+        <tbody id="txBody"></tbody>
+      </table>
+    </div>
+    <div class="tx-footer" id="txFooter"></div>
+  </section>
+
+</main>
+
+<!-- ── Footer ── -->
+<footer class="footer">
+  <p>EthScope — Built with Web3.py · Etherscan API · Node.js &nbsp;|&nbsp; CGC Jhanjheri CSE Project 2025–26</p>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>

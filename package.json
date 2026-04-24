@@ -1,0 +1,12 @@
+{
+  "name": "ethscope",
+  "version": "1.0.0",
+  "description": "EthScope — Ethereum Transaction Analyzer",
+  "scripts": {
+    "start": "node backend/server.js",
+    "build": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}
