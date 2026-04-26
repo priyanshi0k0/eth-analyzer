@@ -2,6 +2,7 @@ services:
   - type: web
     name: ethscope
     runtime: node
+    plan: free
     buildCommand: cd backend && npm install
     startCommand: node backend/server.js
     envVars:
