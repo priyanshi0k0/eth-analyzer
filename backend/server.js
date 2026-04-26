@@ -24,9 +24,9 @@ app.use('/api/', apiLimiter);
 
 // ─── Constants ────────────────────────────────────────────
 const ETHERSCAN_BASE = 'https://api.etherscan.io/v2/api';
-const COINGECKO_BASE  = 'https://api.coingecko.com/api/v3';
-const WEI_TO_ETH     = 1e18;
-const GWEI_TO_ETH    = 1e9;
+const COINGECKO_BASE = 'https://api.coingecko.com/api/v3';
+const WEI_TO_ETH = 1e18;
+const GWEI_TO_ETH = 1e9;
 
 // ─── Utility Functions ────────────────────────────────────
 function weiToEth(wei) {
@@ -38,50 +38,50 @@ function isValidAddress(addr) {
 }
 
 function formatTx(tx, walletAddress) {
-  const value    = weiToEth(tx.value);
-  const gasUsed  = parseInt(tx.gasUsed || tx.gas || 0);
+  const value = weiToEth(tx.value);
+  const gasUsed = parseInt(tx.gasUsed || tx.gas || 0);
   const gasPrice = parseFloat(tx.gasPrice || 0) / GWEI_TO_ETH; // in Gwei
   const gasFeeEth = (gasUsed * parseFloat(tx.gasPrice || 0)) / WEI_TO_ETH;
   const timestamp = new Date(parseInt(tx.timeStamp) * 1000);
   const isOutgoing = tx.from.toLowerCase() === walletAddress.toLowerCase();
-  const isError   = tx.isError === '1';
+  const isError = tx.isError === '1';
 
   return {
-    hash:        tx.hash,
+    hash: tx.hash,
     blockNumber: parseInt(tx.blockNumber),
-    timestamp:   timestamp.toISOString(),
+    timestamp: timestamp.toISOString(),
     dateFormatted: timestamp.toLocaleDateString('en-US', {
       year: 'numeric', month: 'short', day: 'numeric',
       hour: '2-digit', minute: '2-digit'
     }),
-    from:        tx.from,
-    to:          tx.to || 'Contract Creation',
-    value:       value,
+    from: tx.from,
+    to: tx.to || 'Contract Creation',
+    value: value,
     valueFormatted: value.toFixed(6),
     gasUsed,
-    gasPrice:    gasPrice.toFixed(2),
+    gasPrice: gasPrice.toFixed(2),
     gasFeeEth,
     gasFeeFormatted: gasFeeEth.toFixed(8),
     isOutgoing,
-    direction:   isOutgoing ? 'OUT' : 'IN',
+    direction: isOutgoing ? 'OUT' : 'IN',
     isError,
-    status:      isError ? 'Failed' : 'Success',
-    methodId:    tx.input ? tx.input.slice(0, 10) : '0x',
+    status: isError ? 'Failed' : 'Success',
+    methodId: tx.input ? tx.input.slice(0, 10) : '0x',
     isContractCall: tx.input && tx.input !== '0x',
     confirmations: parseInt(tx.confirmations || 0),
-    nonce:       parseInt(tx.nonce || 0)
+    nonce: parseInt(tx.nonce || 0)
   };
 }
 
 function computeAnalytics(transactions, walletAddress, ethPrice) {
   const wallet = walletAddress.toLowerCase();
-  let totalGasFeeEth  = 0;
-  let totalSentEth    = 0;
+  let totalGasFeeEth = 0;
+  let totalSentEth = 0;
   let totalReceivedEth = 0;
-  let successCount    = 0;
-  let failedCount     = 0;
-  let contractCalls   = 0;
-  const dailyVolume   = {};
+  let successCount = 0;
+  let failedCount = 0;
+  let contractCalls = 0;
+  const dailyVolume = {};
   const counterparties = {};
 
   transactions.forEach(tx => {
@@ -105,7 +105,7 @@ function computeAnalytics(transactions, walletAddress, ethPrice) {
     const day = tx.timestamp.slice(0, 10);
     if (!dailyVolume[day]) dailyVolume[day] = { sent: 0, received: 0, count: 0 };
     if (tx.isOutgoing) dailyVolume[day].sent += tx.value;
-    else               dailyVolume[day].received += tx.value;
+    else dailyVolume[day].received += tx.value;
     dailyVolume[day].count++;
 
     // Counterparty frequency
@@ -116,8 +116,8 @@ function computeAnalytics(transactions, walletAddress, ethPrice) {
   });
 
   const netFlowEth = totalReceivedEth - totalSentEth;
-  const gasFeeUsd  = totalGasFeeEth * ethPrice;
-  const sentUsd    = totalSentEth * ethPrice;
+  const gasFeeUsd = totalGasFeeEth * ethPrice;
+  const sentUsd = totalSentEth * ethPrice;
   const receivedUsd = totalReceivedEth * ethPrice;
   const netFlowUsd = netFlowEth * ethPrice;
 
@@ -140,19 +140,19 @@ function computeAnalytics(transactions, walletAddress, ethPrice) {
     failedCount,
     successRate: transactions.length > 0 ? ((successCount / transactions.length) * 100).toFixed(1) : '0',
     contractCalls,
-    totalGasFeeEth:   totalGasFeeEth.toFixed(8),
-    totalGasFeeUsd:   gasFeeUsd.toFixed(2),
-    avgGasPerTx:      avgGasPerTx.toFixed(8),
-    totalSentEth:     totalSentEth.toFixed(6),
-    totalSentUsd:     sentUsd.toFixed(2),
+    totalGasFeeEth: totalGasFeeEth.toFixed(8),
+    totalGasFeeUsd: gasFeeUsd.toFixed(2),
+    avgGasPerTx: avgGasPerTx.toFixed(8),
+    totalSentEth: totalSentEth.toFixed(6),
+    totalSentUsd: sentUsd.toFixed(2),
     totalReceivedEth: totalReceivedEth.toFixed(6),
     totalReceivedUsd: receivedUsd.toFixed(2),
-    netFlowEth:       netFlowEth.toFixed(6),
-    netFlowUsd:       netFlowUsd.toFixed(2),
-    netFlowPositive:  netFlowEth >= 0,
+    netFlowEth: netFlowEth.toFixed(6),
+    netFlowUsd: netFlowUsd.toFixed(2),
+    netFlowPositive: netFlowEth >= 0,
     topCounterparties,
-    dailyVolume:      dailyVolumeArray,
-    ethPrice:         ethPrice.toFixed(2)
+    dailyVolume: dailyVolumeArray,
+    ethPrice: ethPrice.toFixed(2)
   };
 }
 
@@ -260,15 +260,15 @@ app.get('/api/analyze/:address', async (req, res) => {
       return res.status(400).json({ error: txData.message || 'API error. Check your API key.' });
     }
 
-    const rawTxs    = txData.result || [];
-    const ethPrice  = ethPriceResponse.status === 'fulfilled'
-                      ? ethPriceResponse.value.data.ethereum.usd
-                      : 3000;
+    const rawTxs = txData.result || [];
+    const ethPrice = ethPriceResponse.status === 'fulfilled'
+      ? ethPriceResponse.value.data.ethereum.usd
+      : 3000;
     const balanceWei = balResponse.status === 'fulfilled' ? balResponse.value.data.result : '0';
     const balanceEth = weiToEth(balanceWei);
 
     const transactions = rawTxs.map(tx => formatTx(tx, address));
-    const analytics    = computeAnalytics(transactions, address, ethPrice);
+    const analytics = computeAnalytics(transactions, address, ethPrice);
 
     res.json({
       address,
