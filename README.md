@@ -42,7 +42,7 @@ npm install
 npm start
 ```
 
-Then open your browser at: **http://localhost:3001**
+Then open your browser at: **https://ethscope.onrender.com**
 
 ---
 
@@ -82,7 +82,7 @@ eth-analyzer/
 
 **Example:**
 ```
-http://localhost:3001/api/analyze/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045?limit=50
+https://ethscope.onrender.com/api/analyze/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045?limit=50
 ```
 
 ---
@@ -129,7 +129,7 @@ http://localhost:3001/api/analyze/0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045?lim
 → Make sure you created `.env` from `.env.example` and added your API key.
 
 **"CORS error" in browser**  
-→ Access via `http://localhost:3001` (not via file://)
+→ Access via `https://ethscope.onrender.com` (not via file://)
 
 **"Cannot connect to server"**  
 → Make sure the backend is running (`npm start` in `/backend` folder)

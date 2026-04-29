@@ -48,7 +48,7 @@ fi
 
 echo ""
 echo "[SUCCESS] Starting EthScope server..."
-echo "[INFO]    Open your browser at: http://localhost:3001"
+echo "[INFO]    Open your browser at: https://ethscope.onrender.com"
 echo ""
 echo "  Press Ctrl+C to stop the server."
 echo ""
@@ -56,9 +56,9 @@ echo ""
 # Try to open browser
 sleep 1
 if command -v open &> /dev/null; then
-    open "http://localhost:3001"
+    open "https://ethscope.onrender.com"
 elif command -v xdg-open &> /dev/null; then
-    xdg-open "http://localhost:3001"
+    xdg-open "https://ethscope.onrender.com"
 fi
 
 npm start

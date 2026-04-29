@@ -48,11 +48,11 @@ if %errorlevel% neq 0 (
 
 echo.
 echo  [SUCCESS] Starting EthScope server...
-echo  [INFO]    Open your browser at: http://localhost:3001
+echo  [INFO]    Open your browser at: https://ethscope.onrender.com
 echo.
 echo  Press Ctrl+C to stop the server.
 echo.
 
 REM Start and open browser
-start "" "http://localhost:3001"
+start "" "https://ethscope.onrender.com"
 npm start

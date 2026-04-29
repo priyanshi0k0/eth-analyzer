@@ -296,7 +296,7 @@ app.get('*', (req, res) => {
 // ─── Start Server ─────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n🚀 Ethereum Transaction Analyzer running!`);
-  console.log(`   Backend API: http://localhost:${PORT}/api/health`);
-  console.log(`   Frontend:    http://localhost:${PORT}`);
-  console.log(`\n   ✅ Open http://localhost:${PORT} in your browser\n`);
+  console.log(`   Backend API: https://ethscope.onrender.com/api/health`);
+  console.log(`   Frontend:    https://ethscope.onrender.com`);
+  console.log(`\n   ✅ Open https://ethscope.onrender.com in your browser\n`);
 });
